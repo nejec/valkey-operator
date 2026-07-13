@@ -9,7 +9,7 @@ which can be used to deploy valkey caches for cluster-internal usage. For exampl
 
 ```yaml
 apiVersion: cache.cs.sap.com/v1alpha1
-kind: Valkey 
+kind: Valkey
 metadata:
   name: test
 spec:
@@ -29,6 +29,34 @@ to install valkey in the cluster. As a consequence of this fact, the following t
 - sentinel cluster (i.e. dynamic primary with read replicas, primary elected by sentinel).
 
 Sharding (valkey-cluster) scenarios are not supported.
+
+### Image and version
+
+By default the operator deploys the Valkey image bundled with the underlying chart. The image can be
+customized through the following attributes:
+
+- `spec.version` sets the image tag (shorthand for `spec.image.tag`).
+- `spec.image.registry` overrides the registry for all images (server, sentinel, metrics exporter).
+- `spec.image.repository` overrides the Valkey server image repository.
+- `spec.image.tag` overrides the tag of the server and sentinel images; takes precedence over `spec.version`.
+- `spec.image.pullPolicy` sets the image pull policy of the Valkey server.
+- `spec.image.pullSecrets` references secrets used to pull from a private registry.
+
+The tag is a literal image tag, not a bare Valkey version. For the bundled Bitnami-based images the tags
+carry an OS/revision suffix, e.g. `8.1.3-debian-12-r0`. Setting a bare tag such as `8.1.3` will fail to pull
+unless your registry publishes that exact tag.
+
+For example, to pull from a private mirror:
+
+```yaml
+spec:
+  image:
+    registry: registry.example.com
+    repository: mirror/valkey
+    tag: 8.1.3-debian-12-r0
+    pullSecrets:
+    - my-registry-secret
+```
 
 ### Sentinel mode
 
