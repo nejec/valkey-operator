@@ -14,11 +14,22 @@ fullnameOverride: {{ $fullname }}
 {{- $bindingSecretName = printf "%s-binding" $fullname }}
 {{- end }}
 
+{{- /* the chart's other two images, os-shell and kubectl, stay unrendered:
+       volumePermissions and sentinel.service.createPrimary are off */}}
 {{- $imageRegistry := (dig "image" "registry" "" .) }}
 {{- $imageRepository := (dig "image" "repository" "bitnamilegacy/valkey" .) }}
 {{- $imageTag := (dig "image" "tag" (dig "version" "" .) .) }}
+{{- /* the chart has no global.imagePullPolicy, so it is set on every image block below */}}
 {{- $imagePullPolicy := (dig "image" "pullPolicy" "" .) }}
 {{- $imagePullSecrets := (dig "image" "pullSecrets" (list) .) }}
+{{- /* global.imageRegistry would win over these, so each image carries its own registry */}}
+{{- $sentinelImageRegistry := (dig "sentinel" "image" "registry" $imageRegistry .) }}
+{{- $sentinelImageRepository := (dig "sentinel" "image" "repository" "bitnamilegacy/valkey-sentinel" .) }}
+{{- $sentinelImageTag := (dig "sentinel" "image" "tag" $imageTag .) }}
+{{- $metricsImageRegistry := (dig "metrics" "image" "registry" $imageRegistry .) }}
+{{- $metricsImageRepository := (dig "metrics" "image" "repository" "bitnamilegacy/redis-exporter" .) }}
+{{- /* the exporter is versioned on its own, so its tag does not follow spec.version */}}
+{{- $metricsImageTag := (dig "metrics" "image" "tag" "" .) }}
 
 {{- $storageClass := "" }}
 {{- if $persistenceEnabled }}
@@ -26,29 +37,32 @@ fullnameOverride: {{ $fullname }}
 {{- end }}
 
 image:
-  repository: {{ $imageRepository }}
+  {{- with $imageRegistry }}
+  registry: {{ . | quote }}
+  {{- end }}
+  repository: {{ $imageRepository | quote }}
   {{- with $imageTag }}
-  tag: {{ . }}
+  tag: {{ . | quote }}
+  {{- end }}
+  {{- with $imagePullPolicy }}
+  pullPolicy: {{ . | quote }}
   {{- end }}
   {{- with $imagePullPolicy }}
   pullPolicy: {{ . }}
   {{- end }}
 
 global:
-  # operator images are bitnamilegacy/custom, which the bitnami chart rejects
-  # as "non-standard" unless image verification is skipped
-  security:
-    allowInsecureImages: true
   {{- with $storageClass }}
-  storageClass: {{ . }}
-  {{- end }}
-  {{- with $imageRegistry }}
-  imageRegistry: {{ . }}
+  storageClass: {{ . | quote }}
   {{- end }}
   {{- with $imagePullSecrets }}
   imagePullSecrets:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- /* the renderer skips NOTES.txt, where this check lives, so it is inert here.
+         `helm template` still needs it: the repositories above are always relocated */}}
+  security:
+    allowInsecureImages: true
 
 {{- if gt .replicas 1 }}
 pdb:
@@ -75,7 +89,7 @@ primary:
   {{- toYaml . | nindent 2 }}
   {{- end }}
   {{- with .priorityClassName }}
-  priorityClassName: {{ . }}
+  priorityClassName: {{ . | quote }}
   {{- end }}
   {{- with .podSecurityContext }}
   podSecurityContext:
@@ -101,12 +115,12 @@ primary:
     enabled: {{ $persistenceEnabled }}
     {{- if $persistenceEnabled }}
     {{- with .persistence.size }}
-    size: {{ . }}
+    size: {{ . | quote }}
     {{- end }}
     {{- end }}
   {{- if .persistence }}
   {{- with .persistence.extraVolumes }}
-  extraVolumes: 
+  extraVolumes:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- end }}
@@ -123,8 +137,8 @@ primary:
   {{- with .sidecars }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- end }}   
-  
+  {{- end }}
+
 replica:
   replicaCount: {{ ternary .replicas (max (sub .replicas 1) 0) $sentinelEnabled }}
   {{- with .nodeSelector }}
@@ -144,7 +158,7 @@ replica:
   {{- toYaml . | nindent 2 }}
   {{- end }}
   {{- with .priorityClassName }}
-  priorityClassName: {{ . }}
+  priorityClassName: {{ . | quote }}
   {{- end }}
   {{- with .podSecurityContext }}
   podSecurityContext:
@@ -170,14 +184,14 @@ replica:
     enabled: {{ $persistenceEnabled }}
     {{- if $persistenceEnabled }}
     {{- with .persistence.size }}
-    size: {{ . }}
+    size: {{ . | quote }}
     {{- end }}
     {{- end }}
   {{- if .persistence }}
   {{- with .persistence.extraVolumes }}
-  extraVolumes: 
+  extraVolumes:
     {{- toYaml . | nindent 4 }}
-  {{- end }} 
+  {{- end }}
   {{- end }}
   {{- with .extraEnvVars }}
   extraEnvVars:
@@ -192,15 +206,21 @@ replica:
   {{- with .sidecars }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- end }}   
+  {{- end }}
 
 {{- if $sentinelEnabled }}
 sentinel:
   enabled: true
   image:
-    repository: bitnamilegacy/valkey-sentinel
-    {{- with $imageTag }}
-    tag: {{ . }}
+    {{- with $sentinelImageRegistry }}
+    registry: {{ . | quote }}
+    {{- end }}
+    repository: {{ $sentinelImageRepository | quote }}
+    {{- with $sentinelImageTag }}
+    tag: {{ . | quote }}
+    {{- end }}
+    {{- with $imagePullPolicy }}
+    pullPolicy: {{ . | quote }}
     {{- end }}
   {{- with .sentinel.resources }}
   resources:
@@ -220,7 +240,16 @@ sentinel:
 metrics:
   enabled: true
   image:
-    repository: bitnamilegacy/redis-exporter
+    {{- with $metricsImageRegistry }}
+    registry: {{ . | quote }}
+    {{- end }}
+    repository: {{ $metricsImageRepository | quote }}
+    {{- with $metricsImageTag }}
+    tag: {{ . | quote }}
+    {{- end }}
+    {{- with $imagePullPolicy }}
+    pullPolicy: {{ . | quote }}
+    {{- end }}
   {{- with .metrics.resources }}
   resources:
     {{- toYaml . | nindent 4 }}
@@ -238,7 +267,7 @@ metrics:
   {{- with .metrics.prometheusRule }}
   prometheusRule:
     {{- toYaml . | nindent 4 }}
-  {{- end }}{{- end }}  
+  {{- end }}{{- end }}
 {{- end }}
 
 {{- if $tlsEnabled }}
@@ -257,16 +286,12 @@ tls:
 
 networkPolicy:
   enabled: true
-  extraEgress:
-  - ports:
-    - protocol: UDP
-    - protocol: TCP
 
 extraDeploy:
 - apiVersion: v1
   kind: Secret
   metadata:
-    name: {{ $bindingSecretName }}
+    name: {{ $bindingSecretName | quote }}
     annotations:
       helm.sh/hook: post-install
   type: Opaque

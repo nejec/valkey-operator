@@ -35,27 +35,41 @@ type ValkeySpec struct {
 	ExtraFlags                              []string               `json:"extraFlags,omitempty"`
 }
 
-// ImageProperties overrides the image used for the Valkey containers.
-// Registry and pull secrets apply to every image (server, sentinel, metrics exporter).
-// Repository and pull policy apply to the Valkey server image, while tag applies to
-// both the server and sentinel images, which share the same Valkey version.
+// ImageProperties addresses the Valkey server image. Pull policy applies to the server, sentinel
+// and exporter images. Pull secrets are set on the pod, so they cover its sidecar images too.
+// The sentinel also inherits registry and tag; the exporter inherits only registry.
 type ImageProperties struct {
-	Registry    string            `json:"registry,omitempty"`
-	Repository  string            `json:"repository,omitempty"`
-	Tag         string            `json:"tag,omitempty"`
+	Registry   string `json:"registry,omitempty"`
+	Repository string `json:"repository,omitempty"`
+	Tag        string `json:"tag,omitempty"`
+	// +kubebuilder:validation:Enum=Always;Never;IfNotPresent
 	PullPolicy  corev1.PullPolicy `json:"pullPolicy,omitempty"`
 	PullSecrets []string          `json:"pullSecrets,omitempty"`
 }
 
+// ImageOverride addresses one image on its own. Registry falls back to spec.image, and so does the
+// sentinel's tag. Repository never falls back: each image keeps its own default. Pull policy and
+// pull secrets always come from spec.image.
+type ImageOverride struct {
+	Registry   string `json:"registry,omitempty"`
+	Repository string `json:"repository,omitempty"`
+	Tag        string `json:"tag,omitempty"`
+}
+
 // SentinelProperties models attributes of the sentinel sidecar
 type SentinelProperties struct {
-	Enabled                                 bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled,omitempty"`
+	// Image of the sentinel sidecar. The valkey server container in the same pod takes its image
+	// from spec.image.
+	Image                                   *ImageOverride `json:"image,omitempty"`
 	component.KubernetesContainerProperties `json:",inline"`
 }
 
 // MetricsProperties models attributes of the metrics exporter sidecar
 type MetricsProperties struct {
-	Enabled                                 bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled,omitempty"`
+	// Image of the metrics exporter. Its tag defaults to the version bundled with the chart.
+	Image                                   *ImageOverride `json:"image,omitempty"`
 	component.KubernetesContainerProperties `json:",inline"`
 	ServiceMonitor                          *MetricsServiceMonitorProperties `json:"monitor,omitempty"`
 	PrometheusRule                          *MetricsPrometheusRuleProperties `json:"prometheusRule,omitempty"`
