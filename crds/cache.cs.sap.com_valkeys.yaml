@@ -1129,14 +1129,17 @@ spec:
                 type: array
               image:
                 description: |-
-                  ImageProperties overrides the image used for the Valkey containers.
-                  Registry and pull secrets apply to every image (server, sentinel, metrics exporter).
-                  Repository and pull policy apply to the Valkey server image, while tag applies to
-                  both the server and sentinel images, which share the same Valkey version.
+                  ImageProperties addresses the Valkey server image. Pull policy applies to the server, sentinel
+                  and exporter images. Pull secrets are set on the pod, so they cover its sidecar images too.
+                  The sentinel also inherits registry and tag; the exporter inherits only registry.
                 properties:
                   pullPolicy:
                     description: PullPolicy describes a policy for if/when to pull
                       a container image
+                    enum:
+                    - Always
+                    - Never
+                    - IfNotPresent
                     type: string
                   pullSecrets:
                     items:
@@ -1155,6 +1158,17 @@ spec:
                 properties:
                   enabled:
                     type: boolean
+                  image:
+                    description: Image of the metrics exporter. Its tag defaults to
+                      the version bundled with the chart.
+                    properties:
+                      registry:
+                        type: string
+                      repository:
+                        type: string
+                      tag:
+                        type: string
+                    type: object
                   monitor:
                     properties:
                       additionalLabels:
@@ -4103,6 +4117,18 @@ spec:
                 properties:
                   enabled:
                     type: boolean
+                  image:
+                    description: |-
+                      Image of the sentinel sidecar. The valkey server container in the same pod takes its image
+                      from spec.image.
+                    properties:
+                      registry:
+                        type: string
+                      repository:
+                        type: string
+                      tag:
+                        type: string
+                    type: object
                   resources:
                     description: ResourceRequirements describes the compute resource
                       requirements.
