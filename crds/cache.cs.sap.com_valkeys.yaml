@@ -1127,6 +1127,26 @@ spec:
                 items:
                   type: string
                 type: array
+              image:
+                description: |-
+                  ImageProperties overrides the image used for the Valkey containers.
+                  Registry and pull secrets apply to every image (server, sentinel, metrics exporter).
+                  Repository and pull policy apply to the Valkey server image, while tag applies to
+                  both the server and sentinel images, which share the same Valkey version.
+                properties:
+                  pullPolicy:
+                    type: string
+                  pullSecrets:
+                    items:
+                      type: string
+                    type: array
+                  registry:
+                    type: string
+                  repository:
+                    type: string
+                  tag:
+                    type: string
+                type: object
               metrics:
                 description: MetricsProperties models attributes of the metrics exporter
                   sidecar

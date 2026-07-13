@@ -14,17 +14,43 @@ fullnameOverride: {{ $fullname }}
 {{- $bindingSecretName = printf "%s-binding" $fullname }}
 {{- end }}
 
+{{- $imageRegistry := (dig "image" "registry" "" .) }}
+{{- $imageRepository := (dig "image" "repository" "bitnamilegacy/valkey" .) }}
+{{- $imageTag := (dig "image" "tag" (dig "version" "" .) .) }}
+{{- $imagePullPolicy := (dig "image" "pullPolicy" "" .) }}
+{{- $imagePullSecrets := (dig "image" "pullSecrets" (list) .) }}
+{{- $imageCustomized := (or $imageRegistry (dig "image" "repository" "" .)) }}
+
+{{- $storageClass := "" }}
+{{- if $persistenceEnabled }}
+{{- $storageClass = (dig "persistence" "storageClass" "" .) }}
+{{- end }}
+
 image:
-  repository: bitnamilegacy/valkey
-  {{- with .Version}}
+  repository: {{ $imageRepository }}
+  {{- with $imageTag }}
   tag: {{ . }}
   {{- end }}
+  {{- with $imagePullPolicy }}
+  pullPolicy: {{ . }}
+  {{- end }}
 
-{{- if $persistenceEnabled }}
-{{- with .persistence.storageClass }}
+{{- if or $storageClass $imageRegistry $imagePullSecrets $imageCustomized }}
 global:
+  {{- with $storageClass }}
   storageClass: {{ . }}
-{{- end }}
+  {{- end }}
+  {{- with $imageRegistry }}
+  imageRegistry: {{ . }}
+  {{- end }}
+  {{- with $imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if $imageCustomized }}
+  security:
+    allowInsecureImages: true
+  {{- end }}
 {{- end }}
 
 {{- if gt .replicas 1 }}
@@ -176,7 +202,7 @@ sentinel:
   enabled: true
   image:
     repository: bitnamilegacy/valkey-sentinel
-    {{- with .version }}
+    {{- with $imageTag }}
     tag: {{ . }}
     {{- end }}
   {{- with .sentinel.resources }}
