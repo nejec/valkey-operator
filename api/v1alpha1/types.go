@@ -24,6 +24,7 @@ type ValkeySpec struct {
 	Replicas                                int `json:"replicas,omitempty"`
 	component.KubernetesPodProperties       `json:",inline"`
 	component.KubernetesContainerProperties `json:",inline"`
+	Image                                   *ImageProperties       `json:"image,omitempty"`
 	Sidecars                                []corev1.Container     `json:"sidecars,omitempty"`
 	Sentinel                                *SentinelProperties    `json:"sentinel,omitempty"`
 	Metrics                                 *MetricsProperties     `json:"metrics,omitempty"`
@@ -32,6 +33,18 @@ type ValkeySpec struct {
 	Binding                                 *BindingProperties     `json:"binding,omitempty"`
 	ExtraEnvVars                            []corev1.EnvVar        `json:"extraEnvVars,omitempty"`
 	ExtraFlags                              []string               `json:"extraFlags,omitempty"`
+}
+
+// ImageProperties overrides the image used for the Valkey containers.
+// Registry and pull secrets apply to every image (server, sentinel, metrics exporter).
+// Repository and pull policy apply to the Valkey server image, while tag applies to
+// both the server and sentinel images, which share the same Valkey version.
+type ImageProperties struct {
+	Registry    string            `json:"registry,omitempty"`
+	Repository  string            `json:"repository,omitempty"`
+	Tag         string            `json:"tag,omitempty"`
+	PullPolicy  corev1.PullPolicy `json:"pullPolicy,omitempty"`
+	PullSecrets []string          `json:"pullSecrets,omitempty"`
 }
 
 // SentinelProperties models attributes of the sentinel sidecar
