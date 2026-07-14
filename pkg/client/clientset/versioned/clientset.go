@@ -11,7 +11,7 @@ import (
 	fmt "fmt"
 	http "net/http"
 
-	cachev1alpha1 "github.com/sap/valkey-operator/pkg/client/clientset/versioned/typed/cache.cs.sap.com/v1alpha1"
+	cachev1alpha1 "github.com/nejec/valkey-operator/pkg/client/clientset/versioned/typed/cache.cs.sap.com/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

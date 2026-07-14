@@ -20,8 +20,8 @@ import (
 	"github.com/sap/component-operator-runtime/pkg/manifests/helm"
 	"github.com/sap/component-operator-runtime/pkg/operator"
 
-	operatorv1alpha1 "github.com/sap/valkey-operator/api/v1alpha1"
-	"github.com/sap/valkey-operator/internal/transformer"
+	operatorv1alpha1 "github.com/nejec/valkey-operator/api/v1alpha1"
+	"github.com/nejec/valkey-operator/internal/transformer"
 )
 
 const Name = "valkey-operator.cs.sap.com"

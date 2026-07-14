@@ -1,4 +1,4 @@
-module github.com/sap/valkey-operator
+module github.com/nejec/valkey-operator
 
 go 1.25.6
 

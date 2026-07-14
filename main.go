@@ -23,7 +23,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/sap/valkey-operator/pkg/operator"
+	"github.com/nejec/valkey-operator/pkg/operator"
 )
 
 var (

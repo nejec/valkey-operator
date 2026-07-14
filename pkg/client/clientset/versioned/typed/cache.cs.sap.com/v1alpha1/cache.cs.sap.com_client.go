@@ -10,8 +10,8 @@ package v1alpha1
 import (
 	http "net/http"
 
-	cachecssapcomv1alpha1 "github.com/sap/valkey-operator/api/v1alpha1"
-	scheme "github.com/sap/valkey-operator/pkg/client/clientset/versioned/scheme"
+	cachecssapcomv1alpha1 "github.com/nejec/valkey-operator/api/v1alpha1"
+	scheme "github.com/nejec/valkey-operator/pkg/client/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

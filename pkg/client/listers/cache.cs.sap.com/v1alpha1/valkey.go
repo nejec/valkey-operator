@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package v1alpha1
 
 import (
-	cachecssapcomv1alpha1 "github.com/sap/valkey-operator/api/v1alpha1"
+	cachecssapcomv1alpha1 "github.com/nejec/valkey-operator/api/v1alpha1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	listers "k8s.io/client-go/listers"
 	cache "k8s.io/client-go/tools/cache"

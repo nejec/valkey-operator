@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package v1alpha1
 
 import (
-	internalinterfaces "github.com/sap/valkey-operator/pkg/client/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/nejec/valkey-operator/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

@@ -8,8 +8,8 @@ SPDX-License-Identifier: Apache-2.0
 package cache
 
 import (
-	v1alpha1 "github.com/sap/valkey-operator/pkg/client/informers/externalversions/cache.cs.sap.com/v1alpha1"
-	internalinterfaces "github.com/sap/valkey-operator/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/nejec/valkey-operator/pkg/client/informers/externalversions/cache.cs.sap.com/v1alpha1"
+	internalinterfaces "github.com/nejec/valkey-operator/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.
