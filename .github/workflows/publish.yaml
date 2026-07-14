@@ -101,9 +101,10 @@ jobs:
         repository=$REGISTRY/${{ github.repository }}/crds
         tar cvz * | regctl artifact put -m application/gzip ${repository,,}:${{ github.event.release.tag_name }}
 
-  update-crds:
-    name: Sync CRDs to helm chart
+  update-chart:
+    name: Sync CRDs and appVersion to helm chart
     runs-on: ubuntu-24.04
+    needs: publish-docker
 
     steps:
     - name: Checkout operator
@@ -116,15 +117,16 @@ jobs:
         path: chart-repo
         token: ${{ secrets.WORKFLOW_USER_GH_TOKEN }}
 
-    - name: Sync CRDs into the chart
+    - name: Sync CRDs and appVersion into the chart
       run: |
         rm -rf chart-repo/chart/crds
         cp -r crds chart-repo/chart/crds
+        perl -pi -e "s#^appVersion:.*#appVersion: ${{ github.event.release.tag_name }}#" chart-repo/chart/Chart.yaml
         cd chart-repo
-        [ -n "$(git status --porcelain)" ] || { echo "CRDs already up to date"; exit 0; }
+        [ -n "$(git status --porcelain)" ] || { echo "chart already up to date"; exit 0; }
         git config user.name "${{ vars.WORKFLOW_USER_NAME }}"
         git config user.email "${{ vars.WORKFLOW_USER_EMAIL }}"
         git add -A
-        git commit -m "Update CRDs (operator ${{ github.event.release.tag_name }})"
+        git commit -m "Sync CRDs + appVersion for operator ${{ github.event.release.tag_name }}"
         git push
 
