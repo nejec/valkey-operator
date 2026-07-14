@@ -8,9 +8,9 @@ SPDX-License-Identifier: Apache-2.0
 package fake
 
 import (
-	clientset "github.com/sap/valkey-operator/pkg/client/clientset/versioned"
-	cachev1alpha1 "github.com/sap/valkey-operator/pkg/client/clientset/versioned/typed/cache.cs.sap.com/v1alpha1"
-	fakecachev1alpha1 "github.com/sap/valkey-operator/pkg/client/clientset/versioned/typed/cache.cs.sap.com/v1alpha1/fake"
+	clientset "github.com/nejec/valkey-operator/pkg/client/clientset/versioned"
+	cachev1alpha1 "github.com/nejec/valkey-operator/pkg/client/clientset/versioned/typed/cache.cs.sap.com/v1alpha1"
+	fakecachev1alpha1 "github.com/nejec/valkey-operator/pkg/client/clientset/versioned/typed/cache.cs.sap.com/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

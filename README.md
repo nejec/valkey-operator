@@ -182,7 +182,7 @@ these attributes will be automatically populated by the controller, as in the ab
 
 ## Documentation
 
-The API reference is here: [https://pkg.go.dev/github.com/sap/valkey-operator](https://pkg.go.dev/github.com/sap/valkey-operator).
+The API reference is here: [https://pkg.go.dev/github.com/nejec/valkey-operator](https://pkg.go.dev/github.com/nejec/valkey-operator).
 
 ## Support, Feedback, Contributing
 

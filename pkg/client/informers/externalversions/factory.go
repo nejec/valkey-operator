@@ -12,9 +12,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/sap/valkey-operator/pkg/client/clientset/versioned"
-	cachecssapcom "github.com/sap/valkey-operator/pkg/client/informers/externalversions/cache.cs.sap.com"
-	internalinterfaces "github.com/sap/valkey-operator/pkg/client/informers/externalversions/internalinterfaces"
+	versioned "github.com/nejec/valkey-operator/pkg/client/clientset/versioned"
+	cachecssapcom "github.com/nejec/valkey-operator/pkg/client/informers/externalversions/cache.cs.sap.com"
+	internalinterfaces "github.com/nejec/valkey-operator/pkg/client/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

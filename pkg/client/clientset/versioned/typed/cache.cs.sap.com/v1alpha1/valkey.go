@@ -10,8 +10,8 @@ package v1alpha1
 import (
 	context "context"
 
-	cachecssapcomv1alpha1 "github.com/sap/valkey-operator/api/v1alpha1"
-	scheme "github.com/sap/valkey-operator/pkg/client/clientset/versioned/scheme"
+	cachecssapcomv1alpha1 "github.com/nejec/valkey-operator/api/v1alpha1"
+	scheme "github.com/nejec/valkey-operator/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

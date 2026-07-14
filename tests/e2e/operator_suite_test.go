@@ -53,8 +53,8 @@ import (
 	prometheusv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"github.com/sap/component-operator-runtime/pkg/component"
 	"github.com/sap/go-generics/slices"
-	operatorv1alpha1 "github.com/sap/valkey-operator/api/v1alpha1"
-	"github.com/sap/valkey-operator/pkg/operator"
+	operatorv1alpha1 "github.com/nejec/valkey-operator/api/v1alpha1"
+	"github.com/nejec/valkey-operator/pkg/operator"
 )
 
 var enabled bool
