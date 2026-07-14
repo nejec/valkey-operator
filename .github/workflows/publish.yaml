@@ -101,108 +101,30 @@ jobs:
         repository=$REGISTRY/${{ github.repository }}/crds
         tar cvz * | regctl artifact put -m application/gzip ${repository,,}:${{ github.event.release.tag_name }}
 
-  update-chart:
-    name: Update Helm chart
+  update-crds:
+    name: Sync CRDs to helm chart
     runs-on: ubuntu-24.04
-    environment: release
-    needs: [publish-docker,publish-crds]
 
     steps:
-    - name: Prepare
-      id: prepare
-      run: |
-        chart_repository=$CHART_REPOSITORY
-        if [ -z "$chart_repository" ]; then
-          chart_repository=${{ github.repository }}-helm
-        fi
-        echo "chart_repository=$chart_repository" >> $GITHUB_OUTPUT
-
-        chart_directory=$CHART_DIRECTORY
-        if [ -z "$chart_directory" ]; then
-          chart_directory=chart
-        fi
-        echo "chart_directory=$chart_directory" >> $GITHUB_OUTPUT
-
-    - name: Checkout repository
+    - name: Checkout operator
       uses: actions/checkout@v7
 
-    - name: Checkout chart repository
+    - name: Checkout helm chart repository
       uses: actions/checkout@v7
       with:
-        repository: ${{ steps.prepare.outputs.chart_repository }}
-        path: chart-repository
+        repository: ${{ github.repository }}-helm
+        path: chart-repo
         token: ${{ secrets.WORKFLOW_USER_GH_TOKEN }}
 
-    - name: Setup semver
-      uses: sap/cs-actions/setup-semver@main
-      with:
-        version: ${{ env.SEMVER_VERSION }}
-        install-directory: ${{ runner.temp }}/bin
-
-    - name: Update chart repository
-      id: update
+    - name: Sync CRDs into the chart
       run: |
-        cd chart-repository
-        chart_directory=${{ steps.prepare.outputs.chart_directory }}
-
-        old_version=$(yq .appVersion $chart_directory/Chart.yaml)
-        if [ "${old_version:0:1}" != v ] || [ "$(semver validate $old_version)" != valid ]; then
-          >&2 echo "Found invalid current appVersion ($old_version) in $chart_directory/Chart.yaml)."
-          exit 1
-        fi
-
-        new_version=${{ github.event.release.tag_name }}
-        if [ "${new_version:0:1}" != v ] || [ "$(semver validate $new_version)" != valid ]; then
-          >&2 echo "Invalid target appVersion ($new_version)."
-          exit 1
-        fi
-
-        if [ $(semver compare $new_version $old_version) -lt 0 ]; then
-          echo "Target appVersion ($new_version) is lower than current appVersion ($old_version); skipping update ..."
-          exit 0
-        fi
-
-        version_bump=$(semver diff $new_version $old_version)
-        echo "Found appVersion bump: $version_bump."
-        if [ "$version_bump" != major ] && [ "$version_bump" != minor ]; then
-          version_bump=patch
-        fi
-        echo "Performing chart version bump: $version_bump ..."
-
-        echo "Updating custom resource definitions ($chart_directory/crds) ..."
-        rm -rf $chart_directory/crds
-        cp -r ../crds $chart_directory
-
-        echo "Updating appVersion in $chart_directory/Chart.yaml (current: $old_version; target: $new_version) ..."
-        perl -pi -e "s#^appVersion:.*#appVersion: $new_version#g" $chart_directory/Chart.yaml
-
-        if [ -z "$(git status --porcelain)" ]; then
-          echo "Nothing has changed; skipping commit/push ..."
-          exit 0
-        fi
-
+        rm -rf chart-repo/chart/crds
+        cp -r crds chart-repo/chart/crds
+        cd chart-repo
+        [ -n "$(git status --porcelain)" ] || { echo "CRDs already up to date"; exit 0; }
         git config user.name "${{ vars.WORKFLOW_USER_NAME }}"
         git config user.email "${{ vars.WORKFLOW_USER_EMAIL }}"
         git add -A
-        git commit -F- <<END
-        Update chart (triggered by operator release $new_version)
-        Repository: ${{ github.repository }}
-        Release: ${{ github.event.release.tag_name }}
-        Commit: ${{ github.sha }}
-        END
+        git commit -m "Update CRDs (operator ${{ github.event.release.tag_name }})"
         git push
 
-        echo "version_bump=$version_bump" >> $GITHUB_OUTPUT
-
-        # add some safety sleep to overcome github race conditions
-        sleep 10s
-
-    - name: Release chart repository
-      if: steps.update.outputs.version_bump != ''
-      uses: benc-uk/workflow-dispatch@v1
-      with:
-        repo: ${{ steps.prepare.outputs.chart_repository }}
-        workflow: release.yaml
-        ref: main
-        token: ${{ secrets.WORKFLOW_USER_GH_TOKEN }}
-        inputs: '{ "version-bump": "${{ steps.update.outputs.version_bump }}" }'
