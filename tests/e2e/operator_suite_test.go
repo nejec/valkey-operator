@@ -330,7 +330,8 @@ var _ = Describe("Deploy Valkey", func() {
 			},
 		}
 		defer deleteValkey(valkey, true, "60s")
-		createValkey(valkey, true, "300s")
+		// slowest path (CA-issued TLS + sentinel cold start); needs more than 300s in CI
+		createValkey(valkey, true, "600s")
 		doSomethingWithValkey(valkey)
 	})
 
