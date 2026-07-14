@@ -41,8 +41,8 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	operatorv1alpha1 "github.com/sap/valkey-operator/api/v1alpha1"
-	"github.com/sap/valkey-operator/pkg/operator"
+	operatorv1alpha1 "github.com/nejec/valkey-operator/api/v1alpha1"
+	"github.com/nejec/valkey-operator/pkg/operator"
 )
 
 func TestOperator(t *testing.T) {
