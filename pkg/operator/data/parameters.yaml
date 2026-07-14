@@ -19,7 +19,6 @@ fullnameOverride: {{ $fullname }}
 {{- $imageTag := (dig "image" "tag" (dig "version" "" .) .) }}
 {{- $imagePullPolicy := (dig "image" "pullPolicy" "" .) }}
 {{- $imagePullSecrets := (dig "image" "pullSecrets" (list) .) }}
-{{- $imageCustomized := (or $imageRegistry (dig "image" "repository" "" .)) }}
 
 {{- $storageClass := "" }}
 {{- if $persistenceEnabled }}
@@ -35,8 +34,11 @@ image:
   pullPolicy: {{ . }}
   {{- end }}
 
-{{- if or $storageClass $imageRegistry $imagePullSecrets $imageCustomized }}
 global:
+  # operator images are bitnamilegacy/custom, which the bitnami chart rejects
+  # as "non-standard" unless image verification is skipped
+  security:
+    allowInsecureImages: true
   {{- with $storageClass }}
   storageClass: {{ . }}
   {{- end }}
@@ -47,11 +49,6 @@ global:
   imagePullSecrets:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if $imageCustomized }}
-  security:
-    allowInsecureImages: true
-  {{- end }}
-{{- end }}
 
 {{- if gt .replicas 1 }}
 pdb:
