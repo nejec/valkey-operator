@@ -1135,6 +1135,8 @@ spec:
                   both the server and sentinel images, which share the same Valkey version.
                 properties:
                   pullPolicy:
+                    description: PullPolicy describes a policy for if/when to pull
+                      a container image
                     type: string
                   pullSecrets:
                     items:
