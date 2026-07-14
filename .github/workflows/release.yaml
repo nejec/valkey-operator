@@ -135,17 +135,6 @@ jobs:
         echo "Target commit: $sha"
         echo "sha=$sha" >> $GITHUB_OUTPUT
 
-    - name: Wait for check suites to complete
-      if: steps.get_target_release.outputs.create_release == 'true'
-      uses: sap-contributions/await-check-suites@master
-      with:
-        ref: ${{ steps.get_target_commit.outputs.sha }}
-        intervalSeconds: 10
-        timeoutSeconds: 1800
-        failStepIfUnsuccessful: true
-        appSlugFilter: github-actions
-
-
     - name: Generate release notes
       id: release_notes
       if: steps.get_target_release.outputs.create_release == 'true'
