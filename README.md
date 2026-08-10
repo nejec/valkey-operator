@@ -58,6 +58,10 @@ spec:
     - my-registry-secret
 ```
 
+The referenced pull secrets have to exist in the namespace of the `Valkey` object; they are not created by the
+operator. They are set on every valkey pod, and therefore apply to all of its images (server, sentinel and
+metrics exporter alike).
+
 ### Sentinel mode
 
 If `spec.sentinel.enabled` is false, one valkey primary node will be deployed, and `spec.replicas - 1` read replicas.
