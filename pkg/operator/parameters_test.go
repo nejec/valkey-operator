@@ -16,7 +16,7 @@ import (
 	"github.com/sap/component-operator-runtime/pkg/component"
 	"github.com/sap/component-operator-runtime/pkg/manifests"
 
-	operatorv1alpha1 "github.com/sap/valkey-operator/api/v1alpha1"
+	operatorv1alpha1 "github.com/nejec/valkey-operator/api/v1alpha1"
 )
 
 func TestImageParameters(t *testing.T) {
